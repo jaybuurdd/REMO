@@ -1,6 +1,4 @@
 import os
-import io
-import pytesseract
 from dotenv import load_dotenv
 # from pdf2image import convert_from_bytes
 

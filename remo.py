@@ -5,6 +5,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 import responses
+from services.logging import logger
 
 def send_as_file(ctx, message):
         with io.StringIO(message) as file:
@@ -59,7 +60,7 @@ def run_remo_bot():
     # When the bot has started
     @client.event
     async def on_ready():
-        print(f'{client.user} is now running!')
+        logger.info(f'{client.user} is now running!')
 
     @client.command()
     async def set_channel(ctx, channel: discord.TextChannel):

@@ -10,76 +10,37 @@ client = OpenAI(api_key=api_key)
 def chatgpt_review(image_urls) -> str:
     # print(f"\n{url}\n")
     input = '''
-
         Refer to the user in second person.
         
+        Review this resume based on the following criteria:
 
-        Their contact info should be at the top.
+        Conciseness and Clarity: Ensure the resume is concise, clear, and focused on skills and experiences relevant to the job. Check for a brief, impactful professional summary.
 
+        Customization: Confirm the resume is tailored to the job description, using relevant keywords and highlighting appropriate skills.
 
-        Proof read their summaries if they provide one and suggest a revised version for them to see.
+        Formatting and Consistency: Evaluate the formatting for professional appearance, consistency in font sizes and styles, and effective use of white space.
 
-
-        Their social media's should be shared if possible (e.g LinkedIn, GitHub) if its missing.
-
-
-        Remind user to double check all links are clickable and blue and/or underlined.
-
-
-        Job experience should be 3-4 strong bullet points. They shouldn't use metric numbers like "`80%` increase on user engagement", without mentioning how they got the caluclations.
-
-
-        The job bullet points should have 1-2 that mention a feature or system design they implemented at a specified job.
-
-
-        If their job expereince bullet points are to vague give examples of how they could improve by giving scenario examples that they should only use for reference.
-
+        Achievements and Metrics: Look for achievement-oriented language and quantification of achievements with metrics and statistics.
         
-        Education should show school first then degree, in this format:
+        Active Language: Verify the use of strong action verbs and active language. Avoid passive language and personal pronouns.
 
-            The University of Chicago
-            B.S in Computer Science
-
-
-        If they have full-time job experience Education should go at the bottom (any job expereince other than internship or research).\
+        Relevance of Sections: Check for relevant sections such as work experience, education, skills, and possibly interests or projects. Ensure the most recent education and experiences are listed first.
         
+        Skills Section: Assess whether the skills section is tailored to the job, including technical, language, and soft skills.
         
-        If they have a Publication type section they should provide links to their paper's if possible.
-
-
-        Projects should go under job experience and should be a brief description of the project. If they have a lot of job expereince or 3 strong bullet points talking about tech they utilized if they don't have much expereince.
-
+        Error-Free Content: Check for any spelling or grammatical errors.
         
-        Projects should have clickable links to Github and/or live site if possible.
-
-
-        Users shouldn't have personality or interests sections in their resume or anything irrelevant like gender, favorite foods, etc.
-
-
-        A resume can have a interest section if they have no experience.
-
-
-        Make a note to the user that you can't tell how long their resume is but unless they have 10+ years expereince their resume really should only be 2-3 pages long.
-
-
-        Give your best assessment of the formatting of their resume and if its readable.
-
-
-        Note that the resume can put keywords in bold like tech used mentioned in their sentences.
-
-
-        Only Project section and Job section should have bullet points.
-
-
-        If the user provide a list of technologies used underneath each job They can have that as long as there's no bullet points and they highlight the list in bold.
-
-
-        Skills shouldn't have a long list of bullet points. They can put them in their own categories or just list them like this:
-
-            Git, Java, Python, Redis, SQL, NoSQL
-
-        Only mention these things if they go against the guidlines above.
-
+        Professional Contact Information: Confirm the presence of up-to-date and professional contact information.
+        
+        International Considerations: For international applications, check if the resume adheres to country-specific norms.
+        Also for any languages listed recommend they rank all the eligible one's A1 - AC based on the CEFR language scale: https://en.wikipedia.org/wiki/Common_European_Framework_of_Reference_for_Languages
+        
+        Avoidance of Personal Information: Ensure no unnecessary personal information is included.
+        Length and Brevity: The resume should ideally be one page, especially for less than 10 years of experience.
+        
+        PDF Format: Suggest saving the resume as a PDF for submission, unless another format is specified.
+        
+        Provide feedback and suggestions for improvement based on these criteria.
         '''
     try:
          # Prepare the user message content with text and images
