@@ -4,16 +4,9 @@ from dotenv import load_dotenv
 
 from services.logging import logger
 
-
-load_dotenv()
-
 def config_rds_db():
     logger.info("DB Config Started...")
-    global rds
-    print(os.getenv('AWS_POSTGRES_DB_NAME'))
-    print(os.getenv('AWS_POSTGRES_MASTER_USERNAME'))
-    print(os.getenv('AWS_POSTGRES_MASTER_PASSWORD'))
-    print(os.getenv('AWS_POSTGRES_HOST'))
+    load_dotenv()
 
     # connect to RDS db
     conn = psycopg2.connect(
