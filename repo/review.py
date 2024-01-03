@@ -12,7 +12,7 @@ def chatgpt_review(image_urls) -> str:
     input = '''
         Refer to the user in second person.
         
-        Review this resume based on the following criteria:
+        Review this resume based on the following criteria give detailed exampeles of any improvements you suggest based on it:
 
         Conciseness and Clarity: Ensure the resume is concise, clear, and focused on skills and experiences relevant to the job. Check for a brief, impactful professional summary.
 
@@ -20,7 +20,7 @@ def chatgpt_review(image_urls) -> str:
 
         Formatting and Consistency: Evaluate the formatting for professional appearance, consistency in font sizes and styles, and effective use of white space.
 
-        Achievements and Metrics: Look for achievement-oriented language and quantification of achievements with metrics and statistics.
+        Achievements and Metrics: Look for achievement-oriented language and quantification of achievements with metrics and statistics. Remind them to always backup metrics with tangible evidence and not just give guess numbers. Give an example on how they can do that.
         
         Active Language: Verify the use of strong action verbs and active language. Avoid passive language and personal pronouns.
 
