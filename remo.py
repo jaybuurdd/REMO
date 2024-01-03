@@ -6,6 +6,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 import responses
+from services.commons import split_response
 from services.database import get_rds_instance
 from services.logging import logger
 
@@ -20,29 +21,33 @@ async def lock_thread(thread):
     await thread.edit(locked=True)
 
 
-async def send_review(ctx, client, user_message, user_files):
+async def send_review(ctx, user_message, user_files):
     try:
+        # check if user provided attachment
         if user_files:
-            thread = await ctx.message.create_thread(name=f"{ctx.author} Review")
-
-            await thread.send("Running review on Resume, please wait...")
-            response = await responses.handle_review(user_message, user_files)
-            if isinstance(response, str) and response.startswith("Sorry"): 
-                await ctx.send(response)   
+            # check attachments are .png
+            if all(f.filename.lower().endswith('.png') for f in user_files):
+                await ctx.send("Sorry, I only accept PNG files. Please try again.")
             else:
-                response_file = send_as_file(ctx, response)  
-                await thread.send(file=response_file)
+                thread = await ctx.message.create_thread(name=f"{ctx.author} Review")
+
+                await thread.send("Running review on Resume, please wait...")
+
+                response = await responses.handle_review(user_message, user_files)
+                # response_file = send_as_file(ctx, response)  
+                response_pieces = split_response(response)
+
+                for part in response_pieces:
+                    await thread.send(part)
             
         else:
-            response = "You didn't provide a file. Please attach a PNG file(s) of your resume to get a review."
-            # send response to channel
-            await ctx.send(response)
+            await ctx.send("You didn't provide a file. Please attach a PNG file(s) of your resume to get a review.")
 
     except Exception as e:
         print(f"\nERROR sending message: {e}")
 
 def channel_set(ctx):
-     conn, db = get_rds_instance()
+     _, db = get_rds_instance()
 
      server_id = ctx.guild.id;
      # Check if the channel is set for this server
@@ -133,7 +138,7 @@ def run_remo_bot():
             # print(f" and attached '{user_files}'")
 
             # Process the reviews
-            await send_review(ctx, client, user_message, user_files)
+            await send_review(ctx, user_message, user_files)
         else:
             return
 

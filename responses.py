@@ -13,13 +13,10 @@ def handle_no_file() -> str:
 
 async def handle_review(message, files):
     if message == "!review":
-        # Check if all files are PNGs
-        if all(f.filename.lower().endswith('.png') for f in files):
-            image_urls = [attachment.url for attachment in files]
-            return review.chatgpt_review(image_urls)
-        else:
-            # Return a message if any file is not a PNG
-            return "Sorry, I only accept PNG files. Please try again."
+        # review resume image
+        image_urls = [attachment.url for attachment in files]
+        return review.chatgpt_review(image_urls)
+
 
         
 
