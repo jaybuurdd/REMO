@@ -36,11 +36,13 @@ def chatgpt_review(image_urls) -> str:
         Also for any languages listed recommend they rank all the eligible one's A1 - AC based on the CEFR language scale: https://en.wikipedia.org/wiki/Common_European_Framework_of_Reference_for_Languages
         
         Avoidance of Personal Information: Ensure no unnecessary personal information is included.
+
         Length and Brevity: The resume should ideally be one page, especially for less than 10 years of experience.
-        
-        PDF Format: Suggest saving the resume as a PDF for submission, unless another format is specified.
-        
-        Provide feedback and suggestions for improvement based on these criteria.
+
+        Make your review no more than 2-3 paragraphs.
+
+        At the end give their resume a rating, just say: "I give your resume a X/10" don't say anything else after this.
+
         '''
     try:
          # Prepare the user message content with text and images
