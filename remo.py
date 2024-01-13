@@ -75,9 +75,8 @@ def run_remo_bot():
     client.remove_command('help')
     @client.command()
     async def help(ctx):
-        channel_id = channel_set(ctx)
 
-        if channel_id == ctx.channel.id:
+        if (channel_id := channel_set(ctx)) == ctx.channel.id:
             embed = discord.Embed(title="Bot Commans", description="All available commands: ", color=0xeee657)
             embed.add_field(name="!set_channel #channel-name", value="Sets the bot to operate in a specified channel.\nAdmin must set a channel before bot can be used", inline=False)
             embed.add_field(name="!review <png_file_attachment(s)>", value="Executes resume review", inline=False)
@@ -102,10 +101,9 @@ def run_remo_bot():
 
         # check if server already given channel set already
         db.execute("SELECT * FROM bot_channels WHERE server_id = %s", (server_id,))
-        existing_record = db.fetchone()
 
         # update or save chosen channel to database
-        if existing_record:
+        if existing_record := db.fetchone():
             # update the existing record with new channel id
             db.execute("UPDATE bot_channels SET channel_id = %s WHERE server_id = %s", (channel_id, server_id))
             await ctx.send(f"Bot channel updated to {channel.name}")
@@ -120,9 +118,8 @@ def run_remo_bot():
 
     @client.command()
     async def review(ctx):
-        channel_id = channel_set(ctx)
 
-        if channel_id == ctx.channel.id:
+        if (channel_id := channel_set(ctx)) == ctx.channel.id:
             # channel set, reviews can proceed
             user_message = ctx.message.content
             user_files = None
