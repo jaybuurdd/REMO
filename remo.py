@@ -4,6 +4,7 @@ import asyncio
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+from repo import pdf_image
 
 import responses
 from services.commons import split_response
@@ -25,20 +26,33 @@ async def send_review(ctx, user_message, user_files):
     try:
         # check if user provided attachment
         if user_files:
+            print(user_files)
             # check attachments are .png
-            if all(f.filename.lower().endswith('.png') for f in user_files):
-                await ctx.send("Sorry, I only accept PNG files. Please try again.")
-            else:
+            png_files = [f for f in user_files if f.filename.lower().endswith('.png')]
+            pdf_files = [f for f in user_files if f.filename.lower().endswith('.pdf')]
+            if png_files:
                 thread = await ctx.message.create_thread(name=f"{ctx.author} Review")
 
                 await thread.send("Running review on Resume, please wait...")
 
                 response = await responses.handle_review(user_message, user_files)
-                # response_file = send_as_file(ctx, response)  
                 response_pieces = split_response(response)
 
                 for part in response_pieces:
                     await thread.send(part)
+            elif pdf_files:
+                images = pdf_image.pdf_to_images(pdf_files[0])
+                thread = await ctx.message.create_thread(name=f"{ctx.author} Review")
+
+                await thread.send("Running review on Resume, please wait...")
+
+                response = await responses.handle_review(user_message, images)
+                response_pieces = split_response(response)
+
+                for part in response_pieces:
+                    await thread.send(part)
+            else:
+                await ctx.send("Sorry, I only accept PNG and PDF files. Please try again.")
             
         else:
             await ctx.send("You didn't provide a file. Please attach a PNG file(s) of your resume to get a review.")
