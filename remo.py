@@ -12,7 +12,9 @@ from services.commons import split_response
 from services.database import get_rds_instance
 from services.logging import logger
 
-bucketname = "remo-beta-bucket"
+load_dotenv
+
+bucketname = os.getenv('BUCKET_NAME')
 
 def send_as_file(ctx, message):
         with io.StringIO(message) as file:

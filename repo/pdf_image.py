@@ -4,12 +4,14 @@ import random
 import string
 import os
 from services.awsconn import s3
+from dotenv import load_dotenv
 
 def generate_filename():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
 
 def pdf_to_images(pdf):
-    bucketname = "remo-beta-bucket"
+    load_dotenv()
+    bucketname = os.getenv('BUCKET_NAME')
     filename = generate_filename()
     response = requests.get(pdf)
     
