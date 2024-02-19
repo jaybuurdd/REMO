@@ -4,11 +4,17 @@ import asyncio
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+from repo import pdf_image
+from services.awsconn import s3
 
 import responses
 from services.commons import split_response
 from services.database import get_rds_instance
 from services.logging import logger
+
+load_dotenv
+
+bucketname = os.getenv('BUCKET_NAME')
 
 def send_as_file(ctx, message):
         with io.StringIO(message) as file:
@@ -25,23 +31,44 @@ async def send_review(ctx, user_message, user_files):
     try:
         # check if user provided attachment
         if user_files:
+            print(user_files)
             # check attachments are .png
-            if all(f.filename.lower().endswith('.png') for f in user_files):
-                await ctx.send("Sorry, I only accept PNG files. Please try again.")
-            else:
+            png_files = [f for f in user_files if f.filename.lower().endswith('.png')]
+            pdf_files = [f for f in user_files if f.filename.lower().endswith('.pdf')]
+            if png_files:
                 thread = await ctx.message.create_thread(name=f"{ctx.author} Review")
 
                 await thread.send("Running review on Resume, please wait...")
-
+                print(f"\npng files: {user_files}")
                 response = await responses.handle_review(user_message, user_files)
-                # response_file = send_as_file(ctx, response)  
                 response_pieces = split_response(response)
 
                 for part in response_pieces:
                     await thread.send(part)
+            elif pdf_files:
+                images = pdf_image.pdf_to_images(pdf_files[0])[0]
+                print(f"\nimages: {images}")
+                thread = await ctx.message.create_thread(name=f"{ctx.author} Review")
+
+                await thread.send("Running review on Resume, please wait...")
+
+                response = await responses.handle_review_pdf(user_message, images)
+                response_pieces = split_response(response)
+
+                try:
+                    for part in response_pieces:
+                        await thread.send(part)
+                except Exception as e:
+                    print(f"An error occurred: {e}")
+                finally:
+                    for image in range(len(images)):
+                        s3.delete_object(Bucket=bucketname, Key=images[image])
+
+            else:
+                await ctx.send("Sorry, I only accept PNG and PDF files. Please try again.")
             
         else:
-            await ctx.send("You didn't provide a file. Please attach a PNG file(s) of your resume to get a review.")
+            await ctx.send("You didn't provide a file. Please attach a PNG or PDF file(s) of your resume to get a review.")
 
     except Exception as e:
         print(f"\nERROR sending message: {e}")
@@ -154,4 +181,3 @@ def run_remo_bot():
  
 
     client.run(TOKEN)
-

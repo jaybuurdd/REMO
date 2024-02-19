@@ -15,7 +15,12 @@ async def handle_review(message, files):
     if message == "!review":
         # review resume image
         image_urls = [attachment.url for attachment in files]
+        print(f"image_urls: {image_urls}")
         return review.chatgpt_review(image_urls)
+    
+async def handle_review_pdf(message, files):
+    if message == "!review":
+        return review.chatgpt_review(files)
 
 
         
