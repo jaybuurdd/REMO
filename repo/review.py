@@ -1,5 +1,4 @@
 import os
-import asyncio
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -8,7 +7,7 @@ api_key = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=api_key)
 
 
-async def chatgpt_review(image_urls) -> str:
+def chatgpt_review(image_urls) -> str:
     # print(f"\n{url}\n")
     input = '''
         Refer to the user in second person.
@@ -42,46 +41,42 @@ async def chatgpt_review(image_urls) -> str:
 
         Make your review no more than 2-3 paragraphs.
 
-        At the end give their resume a rating based on the criteries that was met and formatting. Just say: "I give your resume a X/10" don't say anything else after this.
+        At the end give their resume a rating, just say: "I give your resume a X/10" don't say anything else after this.
 
         '''
-    
-    # Prepare the user message content with text and images
-    user_content = [
-        {
-            "type": "text",
-            "text": f"Critique this resume following these guidelines:\n\n{input}\n\nAnything else you might notice that doesn't break the guidelines you can mention as well."
-        }
-    ]
-
-    # Append image URLs
-    user_content.extend(
-        {"type": "image_url", "image_url": {"url": url}} for url in image_urls
-    )
-
-    # Create the messages list for the API call
-    messages = [
-        {
-            "role": "system",
-            "content": "You review resumes and only provide improvements that need to be made to them."
-        },
-        {
-            "role": "user",
-            "content": user_content
-        }
-    ]
-
-
     try:
+         # Prepare the user message content with text and images
+        user_content = [
+            {
+                "type": "text",
+                "text": f"Critique this resume following these guidelines:\n\n{input}\n\nAnything else you might notice that doesn't break the guidelines you can mention as well."
+            }
+        ]
 
-        response = await asyncio.to_thread(
-            client.chat.completions.create,
+        # Append image URLs
+        user_content.extend(
+            {"type": "image_url", "image_url": {"url": url}} for url in image_urls
+        )
+
+        # Create the messages list for the API call
+        messages = [
+            {
+                "role": "system",
+                "content": "You review resumes and only provide improvements that need to be made to them."
+            },
+            {
+                "role": "user",
+                "content": user_content
+            }
+        ]
+        response = client.chat.completions.create(
             model="gpt-4-vision-preview",
             messages=messages,
             max_tokens=4096
         )
 
-        content = response.choices[0].message.content
+        message = response.choices[0].message
+        content = message.content
             
         # print(f"\n\n {content}")
         # print(f"finish: {response.choices[0].finish_reason}")
