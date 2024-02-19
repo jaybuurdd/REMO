@@ -15,4 +15,5 @@ async def handle_review(message, files):
     if message.startswith("!review"):
         # review resume image
         image_urls = [attachment.url for attachment in files]
-        return review.chatgpt_review(image_urls)
+        response = await review.chatgpt_review(image_urls)
+        return response
