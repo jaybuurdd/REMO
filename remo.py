@@ -1,16 +1,15 @@
 import os
 import io
-import asyncio
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-from repo import pdf_image
-from services.awsconn import s3
 
 import responses
+from repo.pdf import pdf_to_images
 from services.commons import split_response
 from services.database import get_rds_instance
 from services.logging import logger
+from services.awsconn import s3
 
 load_dotenv
 
@@ -21,17 +20,14 @@ def send_as_file(ctx, message):
             file = discord.File(file, filename=f"{ctx.message.author}_review.txt")
             return file
 
-
 async def lock_thread(thread):
     # Lock the thread
     await thread.edit(locked=True)
-
 
 async def send_review(ctx, user_message, user_files):
     try:
         # check if user provided attachment
         if user_files:
-            print(user_files)
             # check attachments are .png
             png_files = [f for f in user_files if f.filename.lower().endswith('.png')]
             pdf_files = [f for f in user_files if f.filename.lower().endswith('.pdf')]
@@ -39,27 +35,25 @@ async def send_review(ctx, user_message, user_files):
                 thread = await ctx.message.create_thread(name=f"{ctx.author} Review")
 
                 await thread.send("Running review on Resume, please wait...")
-                print(f"\npng files: {user_files}")
                 response = await responses.handle_review(user_message, user_files)
                 response_pieces = split_response(response)
 
                 for part in response_pieces:
                     await thread.send(part)
             elif pdf_files:
-                images = pdf_image.pdf_to_images(pdf_files[0])[0]
-                print(f"\nimages: {images}")
+                images = pdf_to_images(pdf_files[0])[0]
                 thread = await ctx.message.create_thread(name=f"{ctx.author} Review")
 
                 await thread.send("Running review on Resume, please wait...")
 
-                response = await responses.handle_review_pdf(user_message, images)
+                response = await responses.handle_review(user_message, images)
                 response_pieces = split_response(response)
 
                 try:
                     for part in response_pieces:
                         await thread.send(part)
                 except Exception as e:
-                    print(f"An error occurred: {e}")
+                    logger.info(f"Error processing pdf fil: {e}")
                 finally:
                     for image in range(len(images)):
                         s3.delete_object(Bucket=bucketname, Key=images[image])
@@ -71,7 +65,7 @@ async def send_review(ctx, user_message, user_files):
             await ctx.send("You didn't provide a file. Please attach a PNG or PDF file(s) of your resume to get a review.")
 
     except Exception as e:
-        print(f"\nERROR sending message: {e}")
+        logger.info(f"\nERROR sending message: {e}")
 
 def channel_set(ctx):
      _, db = get_rds_instance()
@@ -102,16 +96,13 @@ def run_remo_bot():
     client.remove_command('help')
     @client.command()
     async def help(ctx):
-        channel_id = channel_set(ctx)
 
-        if channel_id == ctx.channel.id:
-            embed = discord.Embed(title="Bot Commans", description="All available commands: ", color=0xeee657)
-            embed.add_field(name="!set_channel #channel-name", value="Sets the bot to operate in a specified channel.\nAdmin must set a channel before bot can be used", inline=False)
-            embed.add_field(name="!review <png_file_attachment(s)>", value="Executes resume review", inline=False)
+        embed = discord.Embed(title="REMO Bot Commands", description="All available commands: ", color=0xeee657)
+        embed.add_field(name="!set_channel #channel-name", value="Sets the bot to operate in a specified channel.\nAdmin must set a channel before bot can be used", inline=False)
+        embed.add_field(name="!review <png_file_attachment(s)>", value="Executes resume review", inline=False)
 
-            await ctx.send(embed=embed)
-        else:
-            return
+        await ctx.send(embed=embed)
+
 
     # When the bot has started
     @client.event
@@ -157,12 +148,6 @@ def run_remo_bot():
             # Check for attachments in the message
             if ctx.message.attachments:
                 user_files = ctx.message.attachments
-                # Optionally save the file or process it as needed
-                # await user_file.save(user_file.filename)
-
-            # Debug print statements
-            # print(f"\n{ctx.author} said: '{user_message}' in {ctx.channel}")
-            # print(f" and attached '{user_files}'")
 
             # Process the reviews
             await send_review(ctx, user_message, user_files)
