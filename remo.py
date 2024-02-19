@@ -1,6 +1,5 @@
 import os
 import io
-import asyncio
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -15,18 +14,16 @@ def send_as_file(ctx, message):
             file = discord.File(file, filename=f"{ctx.message.author}_review.txt")
             return file
 
-
 async def lock_thread(thread):
     # Lock the thread
     await thread.edit(locked=True)
-
 
 async def send_review(ctx, user_message, user_files):
     try:
         # check if user provided attachment
         if user_files:
             # check attachments are .png
-            if all(f.filename.lower().endswith('.png') for f in user_files):
+            if not all(f.filename.lower().endswith('.png') for f in user_files):
                 await ctx.send("Sorry, I only accept PNG files. Please try again.")
             else:
                 thread = await ctx.message.create_thread(name=f"{ctx.author} Review")
@@ -38,13 +35,12 @@ async def send_review(ctx, user_message, user_files):
                 response_pieces = split_response(response)
 
                 for part in response_pieces:
-                    await thread.send(part)
-            
+                    await thread.send(part)       
         else:
             await ctx.send("You didn't provide a file. Please attach a PNG file(s) of your resume to get a review.")
 
     except Exception as e:
-        print(f"\nERROR sending message: {e}")
+        logger.info(f"\nERROR sending message: {e}")
 
 def channel_set(ctx):
      _, db = get_rds_instance()
@@ -75,16 +71,13 @@ def run_remo_bot():
     client.remove_command('help')
     @client.command()
     async def help(ctx):
-        channel_id = channel_set(ctx)
 
-        if channel_id == ctx.channel.id:
-            embed = discord.Embed(title="Bot Commans", description="All available commands: ", color=0xeee657)
-            embed.add_field(name="!set_channel #channel-name", value="Sets the bot to operate in a specified channel.\nAdmin must set a channel before bot can be used", inline=False)
-            embed.add_field(name="!review <png_file_attachment(s)>", value="Executes resume review", inline=False)
+        embed = discord.Embed(title="REMO Bot Commands", description="All available commands: ", color=0xeee657)
+        embed.add_field(name="!set_channel #channel-name", value="Sets the bot to operate in a specified channel.\nAdmin must set a channel before bot can be used", inline=False)
+        embed.add_field(name="!review <png_file_attachment(s)>", value="Executes resume review", inline=False)
 
-            await ctx.send(embed=embed)
-        else:
-            return
+        await ctx.send(embed=embed)
+
 
     # When the bot has started
     @client.event
@@ -130,8 +123,6 @@ def run_remo_bot():
             # Check for attachments in the message
             if ctx.message.attachments:
                 user_files = ctx.message.attachments
-                # Optionally save the file or process it as needed
-                # await user_file.save(user_file.filename)
 
             # Debug print statements
             # print(f"\n{ctx.author} said: '{user_message}' in {ctx.channel}")
