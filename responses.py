@@ -12,8 +12,20 @@ def handle_no_file() -> str:
 
 
 async def handle_review(message, files):
-    if message.startswith("!review"):
+    if message == "!review":
         # review resume image
         image_urls = [attachment.url for attachment in files]
-        response = await review.chatgpt_review(image_urls)
-        return response
+        return review.chatgpt_review(image_urls)
+
+
+        
+
+# def extract_pdf_stream(stream):
+#     try:
+#         print(f"poppler path: {poppler_path}")
+#         images = convert_from_bytes(stream.read(), poppler_path=poppler_path)
+#         text = " ".join([pytesseract.image_to_string(image) for image in images])
+#         return text
+#     except Exception as e:
+#         print(f"Error processing PDF with Tesseract: {e}")
+#         return
