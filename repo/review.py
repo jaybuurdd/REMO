@@ -3,13 +3,15 @@ import asyncio
 from openai import OpenAI
 from dotenv import load_dotenv
 
+from services.logging import logger
+
 load_dotenv()
 api_key = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=api_key)
 
 
 async def chatgpt_review(image_urls) -> str:
-    # print(f"\n{url}\n")
+    logger.info("Sending images to chatGPT for review...")
     input = '''
         Refer to the user in second person.
         
@@ -83,11 +85,10 @@ async def chatgpt_review(image_urls) -> str:
 
         content = response.choices[0].message.content
             
-        # print(f"\n\n {content}")
-        # print(f"finish: {response.choices[0].finish_reason}")
+        logger.info("Review completed successfuly!")
         return content
     except Exception as e:
-        print(f"Error processing review: {e}")
+        logger.info(f"Error processing review: {e}")
         raise(e)
 
     # def chatgpt_review(text) -> str:

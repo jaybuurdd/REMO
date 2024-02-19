@@ -3,13 +3,13 @@ import io
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-from repo import pdf_image
-from services.awsconn import s3
 
 import responses
+from repo.pdf import pdf_to_images
 from services.commons import split_response
 from services.database import get_rds_instance
 from services.logging import logger
+from services.awsconn import s3
 
 load_dotenv
 
@@ -28,7 +28,6 @@ async def send_review(ctx, user_message, user_files):
     try:
         # check if user provided attachment
         if user_files:
-            print(user_files)
             # check attachments are .png
             png_files = [f for f in user_files if f.filename.lower().endswith('.png')]
             pdf_files = [f for f in user_files if f.filename.lower().endswith('.pdf')]
@@ -36,27 +35,25 @@ async def send_review(ctx, user_message, user_files):
                 thread = await ctx.message.create_thread(name=f"{ctx.author} Review")
 
                 await thread.send("Running review on Resume, please wait...")
-                print(f"\npng files: {user_files}")
                 response = await responses.handle_review(user_message, user_files)
                 response_pieces = split_response(response)
 
                 for part in response_pieces:
                     await thread.send(part)
             elif pdf_files:
-                images = pdf_image.pdf_to_images(pdf_files[0])[0]
-                print(f"\nimages: {images}")
+                images = pdf_to_images(pdf_files[0])[0]
                 thread = await ctx.message.create_thread(name=f"{ctx.author} Review")
 
                 await thread.send("Running review on Resume, please wait...")
 
-                response = await responses.handle_review_pdf(user_message, images)
+                response = await responses.handle_review(user_message, images)
                 response_pieces = split_response(response)
 
                 try:
                     for part in response_pieces:
                         await thread.send(part)
                 except Exception as e:
-                    print(f"An error occurred: {e}")
+                    logger.info(f"Error processing pdf fil: {e}")
                 finally:
                     for image in range(len(images)):
                         s3.delete_object(Bucket=bucketname, Key=images[image])
@@ -151,10 +148,6 @@ def run_remo_bot():
             # Check for attachments in the message
             if ctx.message.attachments:
                 user_files = ctx.message.attachments
-
-            # Debug print statements
-            # print(f"\n{ctx.author} said: '{user_message}' in {ctx.channel}")
-            # print(f" and attached '{user_files}'")
 
             # Process the reviews
             await send_review(ctx, user_message, user_files)

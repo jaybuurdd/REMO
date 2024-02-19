@@ -1,5 +1,5 @@
 import os
-import redis
+#import redis
 import psycopg2
 from dotenv import load_dotenv
 
