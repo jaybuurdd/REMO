@@ -44,7 +44,9 @@ async def chatgpt_review(image_urls) -> str:
 
         Make your review no more than 2-3 paragraphs.
 
-        At the end give their resume a rating based on the criteries that was met and formatting. Just say: "I give your resume a X/10" don't say anything else after this.
+        At the end give their resume a rating based on the criteries that was met and formatting. 
+        Make the rating more strict and don't give everyone 7/10, be more critical and honest.
+        Just say: "I give your resume a X/10" don't say anything else after this.
 
         '''
     
