@@ -17,7 +17,7 @@ def pdf_to_images(pdf):
         load_dotenv()
         bucketname = os.getenv('BUCKET_NAME')
         filename = generate_filename()
-        response = requests.get(pdf)
+        response = requests.get(pdf, timeout=60)
         
         # Save the PDF file with the generated filename
         with open(f"{filename}.pdf", 'wb') as f:
