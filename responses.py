@@ -2,18 +2,17 @@ import os
 from dotenv import load_dotenv
 
 from repo.review import chatgpt_review
+from services.logging import logger
 
 load_dotenv()
 poppler_path = os.getenv('POPPLER_PATH')
 
 async def handle_review(message, files):
     if message.startswith("!review"):
-        # review resume image
-        if hasattr(files, 'url'):
-            image_urls = [attachment.url for attachment in files]
-            response = await chatgpt_review(image_urls)
-        else:
-            print(f"files: {files}")
-            response = await chatgpt_review(files)
-
-        return response
+        urls = files
+        try:
+            if files[0].url:
+                urls = [attachment.url for attachment in files]
+        except AttributeError:
+            logger.info("Files do not have 'url' attribute, using the provided list as is.")
+        return await chatgpt_review(urls)

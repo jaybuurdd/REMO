@@ -14,6 +14,8 @@ async def chatgpt_review(image_urls) -> str:
     logger.info("Sending images to chatGPT for review...")
     input = '''
         Refer to the user in second person.
+
+        If the image is not of a resume just respond "Sorry, the file(s) you provided is not a resume.".
         
         Review this resume based on the following criteria give detailed exampeles of any improvements you suggest based on it:
 
@@ -44,7 +46,7 @@ async def chatgpt_review(image_urls) -> str:
 
         Make your review no more than 2-3 paragraphs.
 
-        At the end give their resume a rating based on the criteries that was met and formatting. Just say: "I give your resume a X/10" don't say anything else after this.
+        At the end give their resume a rating based on overall criteria met, formatting, layout, and grammar.  Just say: "I give your resume a X/10" don't say anything else after this.
 
         '''
     
@@ -90,25 +92,3 @@ async def chatgpt_review(image_urls) -> str:
     except Exception as e:
         logger.info(f"Error processing review: {e}")
         raise(e)
-
-    # def chatgpt_review(text) -> str:
-    #     print(f"\n{text}\n")
-    #     response = client.chat.completions.create(
-    #         model="gpt-3.5-turbo",
-    #         messages=[
-    #             {"role": "system", 
-    #             "content": "You review resume's and only provide improvements that need to be made to them."},
-    #             {
-    #                 "role": "user",
-    #                 "content": [
-    #                     {"type": "text", "text": f"Critique this resume this resume:\n\n{text}"},
-    #                 ],
-    #             }
-    #         ],
-    #     )
-
-    #     message = response.choices[0].message
-    #     content = message.content
-        
-    #     print(f"\n\n {content}")
-    #     return content

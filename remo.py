@@ -15,10 +15,10 @@ load_dotenv
 
 bucketname = os.getenv('BUCKET_NAME')
 
-def send_as_file(ctx, message):
-        with io.StringIO(message) as file:
-            file = discord.File(file, filename=f"{ctx.message.author}_review.txt")
-            return file
+# def send_as_file(ctx, message):
+#         with io.StringIO(message) as file:
+#             file = discord.File(file, filename=f"{ctx.message.author}_review.txt")
+#             return file
 
 async def lock_thread(thread):
     # Lock the thread
@@ -53,10 +53,10 @@ async def send_review(ctx, user_message, user_files):
                     for part in response_pieces:
                         await thread.send(part)
                 except Exception as e:
-                    logger.info(f"Error processing pdf fil: {e}")
-                finally:
-                    for image in range(len(images)):
-                        s3.delete_object(Bucket=bucketname, Key=images[image])
+                    logger.info(f"Error processing pdf file: {e}")
+                # finally:
+                #     for image in range(len(images)):
+                #         s3.delete_object(Bucket=bucketname, Key=images[image])
 
             else:
                 await ctx.send("Sorry, I only accept PNG and PDF files. Please try again.")
@@ -65,7 +65,8 @@ async def send_review(ctx, user_message, user_files):
             await ctx.send("You didn't provide a file. Please attach a PNG or PDF file(s) of your resume to get a review.")
 
     except Exception as e:
-        logger.info(f"\nERROR sending message: {e}")
+        await thread.send("There was a problem processing your review. Please reach out to `jobewone` on Discord to check the issue.")
+        logger.error(f"Issue sending message: {e}")
 
 def channel_set(ctx):
      _, db = get_rds_instance()
