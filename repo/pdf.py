@@ -1,15 +1,15 @@
 import os
 import fitz
-import random
 import string
 import requests
 from dotenv import load_dotenv
 
 from services.logging import logger
 from services.awsconn import s3
+import secrets
 
 def generate_filename():
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+    return ''.join(secrets.SystemRandom().choices(string.ascii_letters + string.digits, k=10))
 
 def pdf_to_images(pdf):
     try:
