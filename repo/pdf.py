@@ -2,11 +2,11 @@ import os
 import fitz
 import random
 import string
-import requests
 from dotenv import load_dotenv
 
 from services.logging import logger
 from services.awsconn import s3
+from security import safe_requests
 
 def generate_filename():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
@@ -17,7 +17,7 @@ def pdf_to_images(pdf):
         load_dotenv()
         bucketname = os.getenv('BUCKET_NAME')
         filename = generate_filename()
-        response = requests.get(pdf)
+        response = safe_requests.get(pdf)
         
         # Save the PDF file with the generated filename
         with open(f"{filename}.pdf", 'wb') as f:
